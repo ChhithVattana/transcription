@@ -9,11 +9,10 @@ data class CustomerInformation(
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     var id: Long? = 0,
-    var firstName: String? = "",
-    var lastName: String? = "",
+    var name: String? = "",
     var phoneNumber: String? = "",
     var email: String? = "",
 
-    @OneToMany(fetch = FetchType.LAZY, cascade = [CascadeType.ALL],mappedBy = "customerId")
+    @OneToMany(fetch = FetchType.LAZY, cascade = [CascadeType.ALL], mappedBy = "customerId")
     var transaction: MutableList<Transaction>? = null
 ) : BaseEntity()

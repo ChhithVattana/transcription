@@ -2,6 +2,7 @@ package com.example.project.model
 
 import com.example.project.model.baseEntity.BaseEntity
 import com.fasterxml.jackson.annotation.JsonFormat
+import com.fasterxml.jackson.annotation.JsonIgnore
 import java.time.LocalDate
 import javax.persistence.*
 
@@ -28,4 +29,9 @@ data class Reservation(
         inverseJoinColumns = [JoinColumn(name = "room_id")]
     )
     var roomId: MutableList<Room>? = null,
+
+    @ManyToOne(fetch = FetchType.LAZY, cascade = [CascadeType.ALL])
+    @JoinColumn(name = "transaction_id")
+    @JsonIgnore
+    var transactionId: Transaction? = null,
 ) : BaseEntity()

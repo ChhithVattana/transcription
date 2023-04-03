@@ -3,6 +3,7 @@ package com.example.project.service.serviceImpl
 import com.example.project.model.Reservation
 import com.example.project.model.Room
 import com.example.project.model.RoomType
+import com.example.project.model.Transaction
 import com.example.project.model.customModel.ReservationCustom
 import com.example.project.repository.ReservationRepository
 import com.example.project.repository.RoomRepository
@@ -44,11 +45,13 @@ class ReservationServiceImpl : BaseServiceImpl<Reservation>(), ReservationServic
         capacity: Int?,
         q: String?,
     ): Page<Room> {
+        val reserved = reservationRepository.findByCheckInOnBetweenOrderByIdDesc(checkInOn, checkOutOn)
+        var roomTmp: MutableList<Room> = mutableListOf()
         val room = roomRepository.findAll { root, query, cb ->
             val predicates = ArrayList<javax.persistence.criteria.Predicate>()
             capacity?.let {
                 predicates.add(
-                    cb.lessThanOrEqualTo(
+                    cb.greaterThanOrEqualTo(
                         root.join<Room, RoomType>("roomType_id")
                             .get("capacity"), capacity
                     )
@@ -77,8 +80,6 @@ class ReservationServiceImpl : BaseServiceImpl<Reservation>(), ReservationServic
             query.orderBy(cb.desc(root.get<Long>("id")))
             cb.and(*predicates.toTypedArray())
         }
-        val reserved = reservationRepository.findByCheckInOnBetweenOrderByIdDesc(checkInOn, checkOutOn)
-        var roomTmp: MutableList<Room> = mutableListOf()
         reserved.forEach { detail ->
             detail.roomId!!.forEach {
                 it.available = detail.checkOutOn == checkInOn
@@ -113,11 +114,23 @@ class ReservationServiceImpl : BaseServiceImpl<Reservation>(), ReservationServic
     override fun addNew(reservationCustom: ReservationCustom): Reservation {
         val reservation = Reservation()
         val roomTmp = roomRepository.findAllById(reservationCustom.roomId)
+        val roomChecked = getAllByDate(reservationCustom.checkInOn!!, reservationCustom.checkOutOn!!)
+        roomChecked.forEach { detail ->
+            detail.roomId!!.forEach {
+                it.available = false
+                if(roomTmp.id == it.id) {
+                    return reservation
+                }
+            }
+        }
         reservation.checkInOn = reservationCustom.checkInOn
         reservation.checkOutOn = reservationCustom.checkOutOn
         reservation.stayDuration = ChronoUnit.DAYS.between(reservationCustom.checkInOn, reservationCustom.checkOutOn)
         reservation.specialRequests = reservationCustom.specialRequests
         reservation.roomId = mutableListOf(roomTmp)
+        reservation.transactionId = reservationCustom.transactionId
+        reservation.transactionId!!.date = LocalDate.now()
+        reservation.transactionId!!.totalPayment = reservation.stayDuration!! * roomTmp.roomType_id!!.price!!
         return reservationRepository.save(reservation)
     }
 }

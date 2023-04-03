@@ -108,7 +108,7 @@ class ReservationServiceImpl : BaseServiceImpl<Reservation>(), ReservationServic
         return reservation
     }
 
-    // ChronoUnit.DAYS.between(V1, V2) to get day between V2-V1 Vn: LocalDate
+    // ChronoUnit.DAYS.between(V1, V2) to get day between V2-V1, Vn: LocalDate
     @Transactional
     override fun addNew(reservationCustom: ReservationCustom): Reservation {
         val reservation = Reservation()

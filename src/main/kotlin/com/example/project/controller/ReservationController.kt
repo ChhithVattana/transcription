@@ -55,4 +55,8 @@ class ReservationController {
         val r = reservationService.addNew(reservationCustom)
         return responseObjectMap.respondObject(r)
     }
+
+//    fun addBooking(reservationCustom: ReservationCustom, noOfRoom: Int): MutableMap<String, Any> {
+//        return
+//    }
 }

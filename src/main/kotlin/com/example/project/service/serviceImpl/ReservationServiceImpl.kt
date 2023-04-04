@@ -8,7 +8,6 @@ import com.example.project.model.customModel.ReservationCustom
 import com.example.project.repository.ReservationRepository
 import com.example.project.repository.RoomRepository
 import com.example.project.service.ReservationService
-import com.sun.org.apache.xpath.internal.operations.Bool
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.data.domain.Page
 import org.springframework.data.domain.PageImpl
@@ -142,15 +141,13 @@ class ReservationServiceImpl : BaseServiceImpl<Reservation>(), ReservationServic
     @Transactional
     override fun addBooking(reservationCustom: ReservationCustom, noOfRoom: Int): Reservation {
         val reservation = Reservation()
-        val roomTmp = roomRepository.findAllByStatusTrueOrderByIdDesc()
+        val roomTmp = roomRepository.findAllByIdIsNot()
         val roomChecked = getAllByDate(reservationCustom.checkInOn!!, reservationCustom.checkOutOn!!)
         roomChecked.forEach { detail ->
             detail.roomId!!.forEach {
                 it.available = false
             }
         }
-        for (i in roomChecked) {
-
-        }
+        return reservation
     }
 }

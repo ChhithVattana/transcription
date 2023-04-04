@@ -3,7 +3,6 @@ package com.example.project.service.serviceImpl
 import com.example.project.model.Reservation
 import com.example.project.model.Room
 import com.example.project.model.RoomType
-import com.example.project.model.Transaction
 import com.example.project.model.customModel.ReservationCustom
 import com.example.project.repository.ReservationRepository
 import com.example.project.repository.RoomRepository

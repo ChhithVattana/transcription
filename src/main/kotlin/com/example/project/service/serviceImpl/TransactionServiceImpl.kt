@@ -35,9 +35,16 @@ class TransactionServiceImpl : BaseServiceImpl<Transaction>(), TransactionServic
             q?.let {
                 val payTypePredicate = cb.like(cb.upper(root.get("paymentType")), "%${q.uppercase()}%")
                 val namePredicate =
-                    cb.like(cb.upper(root.join<Transaction, CustomerInformation>("customerId").get<String>("name")),
-                        "%${q.uppercase()}%")
-                predicates.add(cb.or(payTypePredicate, namePredicate))
+                    cb.like(
+                        cb.upper(root.join<Transaction, CustomerInformation>("customerId").get("name")),
+                        "%${q.uppercase()}%"
+                    )
+                val phonePredicate =
+                    cb.like(
+                        cb.upper(root.join<Transaction, CustomerInformation>("customerId").get("phone")),
+                        "%${q.uppercase()}%"
+                    )
+                predicates.add(cb.or(payTypePredicate, namePredicate, phonePredicate))
             }
             predicates.add(cb.equal(root.get<Boolean>("status"), true))
             query.orderBy(cb.desc(root.get<Long>("id")))

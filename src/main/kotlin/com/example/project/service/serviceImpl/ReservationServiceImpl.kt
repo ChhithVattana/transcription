@@ -1,5 +1,6 @@
 package com.example.project.service.serviceImpl
 
+import com.example.project.exception.ResourceNotAvailable
 import com.example.project.model.Reservation
 import com.example.project.model.Room
 import com.example.project.model.RoomType
@@ -7,6 +8,7 @@ import com.example.project.model.customModel.ReservationCustom
 import com.example.project.repository.ReservationRepository
 import com.example.project.repository.RoomRepository
 import com.example.project.service.ReservationService
+import com.sun.org.apache.xpath.internal.operations.Bool
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.data.domain.Page
 import org.springframework.data.domain.PageImpl
@@ -43,6 +45,7 @@ class ReservationServiceImpl : BaseServiceImpl<Reservation>(), ReservationServic
         checkOutOn: LocalDate?,
         capacity: Int?,
         q: String?,
+        isAvailable: Boolean?,
     ): Page<Room> {
         val reserved = reservationRepository.findByCheckInOnBetweenOrderByIdDesc(checkInOn, checkOutOn)
         var roomTmp: MutableList<Room> = mutableListOf()
@@ -74,6 +77,9 @@ class ReservationServiceImpl : BaseServiceImpl<Reservation>(), ReservationServic
                         ), "%${q.uppercase()}%"
                     )
                 predicates.add(cb.or(roomNoPredicate, roomNamePredicate, bedTypePredicate))
+            }
+            isAvailable?.let {
+                predicates.add(cb.equal(root.get<Boolean>("available"), isAvailable))
             }
             predicates.add(cb.equal(root.get<Boolean>("status"), true))
             query.orderBy(cb.desc(root.get<Long>("id")))
@@ -118,7 +124,7 @@ class ReservationServiceImpl : BaseServiceImpl<Reservation>(), ReservationServic
             detail.roomId!!.forEach {
                 it.available = false
                 if(roomTmp.id == it.id) {
-                    return reservation
+                    throw ResourceNotAvailable("This items is not available yet")
                 }
             }
         }
@@ -131,5 +137,20 @@ class ReservationServiceImpl : BaseServiceImpl<Reservation>(), ReservationServic
         reservation.transactionId!!.date = LocalDate.now()
         reservation.transactionId!!.totalPayment = reservation.stayDuration!! * roomTmp.roomType_id!!.price!!
         return reservationRepository.save(reservation)
+    }
+
+    @Transactional
+    override fun addBooking(reservationCustom: ReservationCustom, noOfRoom: Int): Reservation {
+        val reservation = Reservation()
+        val roomTmp = roomRepository.findAllByStatusTrueOrderByIdDesc()
+        val roomChecked = getAllByDate(reservationCustom.checkInOn!!, reservationCustom.checkOutOn!!)
+        roomChecked.forEach { detail ->
+            detail.roomId!!.forEach {
+                it.available = false
+            }
+        }
+        for (i in roomChecked) {
+
+        }
     }
 }

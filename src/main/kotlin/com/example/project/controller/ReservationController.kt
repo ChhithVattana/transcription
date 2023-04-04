@@ -43,9 +43,10 @@ class ReservationController {
         @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) checkInOn: LocalDate?,
         @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) checkOutOn: LocalDate?,
         capacity: Int?,
-        q: String?
+        q: String?,
+        isAvailable: Boolean?
     ): MutableMap<String, Any> {
-        val r = reservationService.searchAvailable(page, size, checkInOn, checkOutOn, capacity, q)
+        val r = reservationService.searchAvailable(page, size, checkInOn, checkOutOn, capacity, q, isAvailable)
         return responseObjectMap.respondObject(r.content, r.totalElements)
     }
 

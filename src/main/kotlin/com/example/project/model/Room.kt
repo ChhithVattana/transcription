@@ -17,7 +17,7 @@ data class Room(
 
     @ManyToOne(fetch = FetchType.LAZY, cascade = [CascadeType.ALL])
     @JoinColumn(name = "roomType_id")
-    var roomType_id: RoomType? = null,
+    var roomTypeId: RoomType? = null,
 
     @ManyToMany(
         fetch = FetchType.LAZY, mappedBy = "roomId",

@@ -9,5 +9,4 @@ import org.springframework.stereotype.Repository
 interface RoomRepository : JpaRepository<Room, Long>, JpaSpecificationExecutor<Room> {
     fun findAllByStatusTrueOrderByIdDesc(): List<Room>
     fun findAllById(id: Long?): Room
-    fun findAllByIdIsNot(id: List<Long>): List<Room>
 }

@@ -46,14 +46,37 @@ class ReservationServiceImpl : BaseServiceImpl<Reservation>(), ReservationServic
         q: String?,
         isAvailable: Boolean?,
     ): Page<Room> {
-        val reserved = reservationRepository.findByCheckInOnBetweenOrderByIdDesc(checkInOn, checkOutOn)
-        var roomTmp: MutableList<Room> = mutableListOf()
+        val reserved = reservationRepository.findReservationsBetweenDates(checkInOn, checkOutOn)
+        if (reserved.isEmpty()) {
+            val room = roomRepository.findAll()
+            room.forEach {
+                it.available = true
+            }
+            roomRepository.saveAll(room)
+        } else {
+            val room = roomRepository.findAll()
+            val roomTmp: MutableList<Room> = mutableListOf()
+            reserved.forEach { detail ->
+                detail.roomId!!.forEach {
+                    it.available = detail.checkOutOn == checkInOn
+                    roomTmp.add(it)
+                }
+            }
+            roomTmp.forEach {
+                room.forEach { room ->
+                    if (it.id == room.id) {
+                        room.available = it.available
+                    }
+                }
+            }
+            roomRepository.saveAll(room)
+        }
         val room = roomRepository.findAll { root, query, cb ->
             val predicates = ArrayList<javax.persistence.criteria.Predicate>()
             capacity?.let {
                 predicates.add(
                     cb.greaterThanOrEqualTo(
-                        root.join<Room, RoomType>("roomType_id")
+                        root.join<Room, RoomType>("roomTypeId")
                             .get("capacity"), capacity
                     )
                 )
@@ -64,14 +87,14 @@ class ReservationServiceImpl : BaseServiceImpl<Reservation>(), ReservationServic
                 val roomNamePredicate =
                     cb.like(
                         cb.upper(
-                            root.join<Room, RoomType>("roomType_id")
+                            root.join<Room, RoomType>("roomTypeId")
                                 .get("name")
                         ), "%${q.uppercase()}%"
                     )
                 val bedTypePredicate =
                     cb.like(
                         cb.upper(
-                            root.join<Room, RoomType>("roomType_id")
+                            root.join<Room, RoomType>("roomTypeId")
                                 .get("bedType")
                         ), "%${q.uppercase()}%"
                     )
@@ -84,33 +107,16 @@ class ReservationServiceImpl : BaseServiceImpl<Reservation>(), ReservationServic
             query.orderBy(cb.desc(root.get<Long>("id")))
             cb.and(*predicates.toTypedArray())
         }
-        reserved.forEach { detail ->
-            detail.roomId!!.forEach {
-                it.available = detail.checkOutOn == checkInOn
-            }
-            roomTmp = detail.roomId!!
-        }
-        room.forEach { detail ->
-            roomTmp.forEach {
-                if (detail.id == it.id) {
-                    detail.available = it.available
-                } else {
-                    detail.available = true
-                }
-            }
-        }
         // Use PageImpl(List<T> content, Pageable pageable, long total) to return Page<T>
         return PageImpl(room, PageRequest.of(page, size), room.size.toLong())
     }
 
     override fun getAllByDate(checkIn: LocalDate, checkOut: LocalDate): List<Reservation> {
-        val reservation = reservationRepository.findByCheckInOnBetweenOrderByIdDesc(checkIn, checkOut)
-        reservation.forEach { detail ->
-            detail.roomId!!.forEach {
-                it.available = false
-            }
+        val reservations = reservationRepository.findReservationsBetweenDates(checkIn, checkOut).apply {
+            forEach { detail -> detail.roomId!!.forEach { room -> room.available = false } }
+            reservationRepository.saveAll(this)
         }
-        return reservation
+        return reservations
     }
 
     // ChronoUnit.DAYS.between(V1, V2) to get day between V2-V1, Vn: LocalDate
@@ -122,7 +128,7 @@ class ReservationServiceImpl : BaseServiceImpl<Reservation>(), ReservationServic
         roomChecked.forEach { detail ->
             detail.roomId!!.forEach {
                 it.available = false
-                if(roomTmp.id == it.id) {
+                if (roomTmp.id == it.id) {
                     throw ResourceNotAvailable("This items is not available yet")
                 }
             }
@@ -134,20 +140,43 @@ class ReservationServiceImpl : BaseServiceImpl<Reservation>(), ReservationServic
         reservation.roomId = mutableListOf(roomTmp)
         reservation.transactionId = reservationCustom.transactionId
         reservation.transactionId!!.date = LocalDate.now()
-        reservation.transactionId!!.totalPayment = reservation.stayDuration!! * roomTmp.roomType_id!!.price!!
+        reservation.transactionId!!.totalPayment = reservation.stayDuration!! * roomTmp.roomTypeId!!.price!!
         return reservationRepository.save(reservation)
     }
 
     @Transactional
-    override fun addBooking(reservationCustom: ReservationCustom, noOfRoom: Int): Reservation {
+    override fun addBooking(
+        page: Int,
+        size: Int,
+        checkInOn: LocalDate?,
+        checkOutOn: LocalDate?,
+        capacity: Int?,
+        q: String?,
+        isAvailable: Boolean?,
+        reservationCustom: ReservationCustom,
+        noOfRoom: Int,
+    ): Reservation {
         val reservation = Reservation()
-        val roomTmp = roomRepository.findAllByIdIsNot()
-        val roomChecked = getAllByDate(reservationCustom.checkInOn!!, reservationCustom.checkOutOn!!)
-        roomChecked.forEach { detail ->
-            detail.roomId!!.forEach {
-                it.available = false
+        val r = searchAvailable(page, size, checkInOn, checkOutOn, capacity, q, isAvailable)
+        val roomTmp: MutableList<Room> = mutableListOf()
+        var count = 0
+        r.forEach {
+            if (count < noOfRoom) {
+                roomTmp.add(it)
+                count++
+            } else {
+                return@forEach
             }
         }
-        return reservation
+        val price = roomTmp.first().roomTypeId!!.price
+        reservation.checkInOn = reservationCustom.checkInOn
+        reservation.checkOutOn = reservationCustom.checkOutOn
+        reservation.stayDuration = ChronoUnit.DAYS.between(reservationCustom.checkInOn, reservationCustom.checkOutOn)
+        reservation.specialRequests = reservationCustom.specialRequests
+        reservation.roomId = roomTmp
+        reservation.transactionId = reservationCustom.transactionId
+        reservation.transactionId!!.date = LocalDate.now()
+        reservation.transactionId!!.totalPayment = reservation.stayDuration!! * price!! * noOfRoom
+        return reservationRepository.save(reservation)
     }
 }

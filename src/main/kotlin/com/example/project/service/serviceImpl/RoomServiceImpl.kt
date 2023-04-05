@@ -29,7 +29,7 @@ class RoomServiceImpl : BaseServiceImpl<Room>(), RoomService {
 
     override fun getCustomRoom(): List<RoomCustom> {
         return roomRepository.findAllByStatusTrueOrderByIdDesc().map {
-            RoomCustom(it.id, it.roomNo, it.available, it.roomType_id!!.id)
+            RoomCustom(it.id, it.roomNo, it.available, it.roomTypeId!!.id)
         }
     }
 
@@ -41,7 +41,7 @@ class RoomServiceImpl : BaseServiceImpl<Room>(), RoomService {
         val room = Room()
         room.roomNo = roomCustom.roomNo
         room.available = true
-        room.roomType_id = roomTypeRepository.findAllById(roomCustom.roomType_id)
+        room.roomTypeId = roomTypeRepository.findAllById(roomCustom.roomTypeId)
         return roomRepository.save(room)
     }
 
@@ -49,7 +49,7 @@ class RoomServiceImpl : BaseServiceImpl<Room>(), RoomService {
         val r = roomRepository.findAllById(id)
         r.roomNo = roomCustom.roomNo
         r.available = true
-        r.roomType_id = roomTypeRepository.findAllById(roomCustom.roomType_id)
+        r.roomTypeId = roomTypeRepository.findAllById(roomCustom.roomTypeId)
         return roomRepository.save(r)
     }
 

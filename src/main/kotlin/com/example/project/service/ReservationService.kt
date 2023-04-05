@@ -17,6 +17,17 @@ interface ReservationService : BaseService<Reservation> {
         q: String?,
         isAvailable: Boolean?,
     ): Page<Room>
+
     fun addNew(reservationCustom: ReservationCustom): Reservation
-    fun addBooking(reservationCustom: ReservationCustom, noOfRoom: Int): Reservation
+    fun addBooking(
+        page: Int,
+        size: Int,
+        checkInOn: LocalDate?,
+        checkOutOn: LocalDate?,
+        capacity: Int?,
+        q: String?,
+        isAvailable: Boolean?,
+        reservationCustom: ReservationCustom,
+        noOfRoom: Int,
+    ): Reservation
 }

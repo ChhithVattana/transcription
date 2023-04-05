@@ -22,7 +22,7 @@ data class RoomType(
     var url: String? = "",
     var floor: String? = "",
     var capacity: Int? = 0,
-    @OneToMany(fetch = FetchType.LAZY, mappedBy = "roomType_id")
+    @OneToMany(fetch = FetchType.LAZY, mappedBy = "roomTypeId")
     @JsonIgnore
     var room: MutableList<Room>? = null,
     @OneToMany(fetch = FetchType.LAZY, mappedBy = "roomTypeId")

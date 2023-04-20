@@ -5,6 +5,7 @@ import com.example.project.service.RoomService
 import com.example.project.utils.AppConstant
 import com.example.project.utils.ResponseObjectMap
 import org.springframework.beans.factory.annotation.Autowired
+import org.springframework.security.access.prepost.PreAuthorize
 import org.springframework.web.bind.annotation.*
 
 @RestController
@@ -36,18 +37,21 @@ class RoomController {
     }
 
     @PostMapping
+    @PreAuthorize("hasAuthority('PRIVILEGE_ADMIN_INSERT')")
     fun addNewRoom(@RequestBody roomCustom: RoomCustom): MutableMap<String, Any> {
         val r = roomService.addNew(roomCustom)
         return responseObjectMap.respondObject(r)
     }
 
     @PutMapping("/{id}/update")
+    @PreAuthorize("hasAuthority('PRIVILEGE_ADMIN_UPDATE')")
     fun updateRoom(@PathVariable id: Long, @RequestBody roomCustom: RoomCustom): MutableMap<String, Any> {
         val r = roomService.update(id, roomCustom)
         return responseObjectMap.respondObject(r)
     }
 
     @DeleteMapping
+    @PreAuthorize("hasAuthority('PRIVILEGE_ADMIN_DELETE')")
     fun deleteRoom(@RequestParam id: Long): MutableMap<String, Any> {
         val r = roomService.delete(id)
         return responseObjectMap.respondObject(r)

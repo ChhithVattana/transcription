@@ -1,6 +1,7 @@
 package com.example.project.controller
 
 import com.example.project.model.Account
+import com.example.project.model.customModel.AccountCustom
 import com.example.project.service.AccountService
 import com.example.project.utils.AppConstant
 import com.example.project.utils.ResponseObjectMap
@@ -26,8 +27,22 @@ class AccountController {
 
     @PostMapping
     @PreAuthorize("hasAuthority('PRIVILEGE_ADMIN_INSERT')")
-    fun addNew(@RequestBody account: Account): MutableMap<String, Any> {
-        val r = accountService.addNew(account)
+    fun addNew(@RequestBody accountCustom: AccountCustom): MutableMap<String, Any> {
+        val r = accountService.createAcc(accountCustom)
+        return responseObjectMap.respondObject(r)
+    }
+
+    @PutMapping("/{id}/update")
+    @PreAuthorize("hasAuthority('PRIVILEGE_ADMIN_UPDATE')")
+    fun update(@PathVariable id: Long, @RequestBody accountCustom: AccountCustom): MutableMap<String, Any> {
+        val r = accountService.update(id, accountCustom)
+        return responseObjectMap.respondObject(r)
+    }
+
+    @DeleteMapping("/delete")
+    @PreAuthorize("hasAuthority('PRIVILEGE_ADMIN_DELETE')")
+    fun delete(@RequestParam id: Long): MutableMap<String, Any> {
+        val r = accountService.delete(id)
         return responseObjectMap.respondObject(r)
     }
 }

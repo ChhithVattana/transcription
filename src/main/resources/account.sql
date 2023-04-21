@@ -17,6 +17,8 @@ INSERT INTO tbl_privilege (id, name, description)
 VALUES (8, 'PRIVILEGE_STAFF_INSERT', 'description for privilege staff insert');
 INSERT INTO tbl_privilege (id, name, description)
 VALUES (9, 'PRIVILEGE_STAFF_UPDATE', 'description for privilege staff update');
+INSERT INTO tbl_privilege (id, name, description)
+VALUES (10, 'PRIVILEGE_USER_READ', 'Web client to get the data');
 INSERT INTO tbl_role (id, name, description, date_created, date_updated, status)
 VALUES (1, 'ROLE_ADMIN', 'description for role admin', now(), null, true);
 INSERT INTO tbl_role (id, name, description, date_created, date_updated, status)
@@ -24,15 +26,10 @@ VALUES (2, 'ROLE_STAFF', 'description for role staff', now(), null, true);
 
 --password admin for role admin
 INSERT INTO tbl_account (id, enabled, username, password, date_created, date_updated, status)
-VALUES (1, true, 'admin', '$2a$12$6chVYmeMMb0OlIB40g4wReZLnohUG.pAWAajJU8iItvzwm/o6ObIW', now(), null, true);
---password staff for role staff
-INSERT INTO tbl_account (id, enabled, username, password, date_created, date_updated, status)
-VALUES (2, true, 'staff', '$2a$12$vA1Vs89jxULh4A4sVbjO7eBlmj2emA1UGO2yRMXFnyvv.3I8N.Eey', now(), null, true);
+VALUES (0, true, 'admin', '$2a$12$6chVYmeMMb0OlIB40g4wReZLnohUG.pAWAajJU8iItvzwm/o6ObIW', now(), null, true);
 
 INSERT INTO tbl_account_roles (account_id, roles_id)
-VALUES (1, 1);
-INSERT INTO tbl_account_roles (account_id, roles_id)
-VALUES (2, 2);
+VALUES (0, 1);
 
 --Connect between role and privilege admin can access all privilege
 INSERT INTO tbl_role_privileges (role_id, privileges_id)
@@ -53,6 +50,8 @@ INSERT INTO tbl_role_privileges (role_id, privileges_id)
 VALUES (1, 8);
 INSERT INTO tbl_role_privileges (role_id, privileges_id)
 VALUES (1, 9);
+INSERT INTO tbl_role_privileges (role_id, privileges_id)
+VALUES (1, 10);
 --Connect between role and privilege staff can access only
 INSERT INTO tbl_role_privileges (role_id, privileges_id)
 VALUES (2, 1);

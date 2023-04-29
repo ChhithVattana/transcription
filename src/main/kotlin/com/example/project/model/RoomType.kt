@@ -8,7 +8,7 @@ import javax.persistence.*
 @Table(name = "tbl_room_type")
 data class RoomType(
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @GeneratedValue(strategy = GenerationType.AUTO)
     var id: Long? = 0,
     var name: String? = "",
     var price: Double? = 0.0,

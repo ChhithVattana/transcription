@@ -23,13 +23,15 @@ INSERT INTO tbl_role (id, name, description, date_created, date_updated, status)
 VALUES (1, 'ROLE_ADMIN', 'description for role admin', now(), null, true);
 INSERT INTO tbl_role (id, name, description, date_created, date_updated, status)
 VALUES (2, 'ROLE_STAFF', 'description for role staff', now(), null, true);
+INSERT INTO tbl_role (id, name, description, date_created, date_updated, status)
+VALUES (3, 'ROLE_USER', 'description for role user', now(), null, true);
 
 --password admin for role admin
-INSERT INTO tbl_account (id, enabled, username, password, date_created, date_updated, status)
-VALUES (0, true, 'admin', '$2a$12$6chVYmeMMb0OlIB40g4wReZLnohUG.pAWAajJU8iItvzwm/o6ObIW', now(), null, true);
+INSERT INTO tbl_account (enabled, username, password, date_created, date_updated, status)
+VALUES (true, 'admin', '$2a$12$6chVYmeMMb0OlIB40g4wReZLnohUG.pAWAajJU8iItvzwm/o6ObIW', now(), null, true);
 
 INSERT INTO tbl_account_roles (account_id, roles_id)
-VALUES (0, 1);
+VALUES (1, 1);
 
 --Connect between role and privilege admin can access all privilege
 INSERT INTO tbl_role_privileges (role_id, privileges_id)

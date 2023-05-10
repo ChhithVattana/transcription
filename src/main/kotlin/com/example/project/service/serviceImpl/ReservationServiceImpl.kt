@@ -165,6 +165,7 @@ class ReservationServiceImpl : BaseServiceImpl<Reservation>(), ReservationServic
                 roomTmp.add(it)
                 count++
             } else {
+                // exit loop
                 return@forEach
             }
         }

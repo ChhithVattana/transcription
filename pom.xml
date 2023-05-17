@@ -112,6 +112,7 @@
                 </dependencies>
             </plugin>
         </plugins>
+        <finalName>hotel-management-aws</finalName>
     </build>
 
 </project>

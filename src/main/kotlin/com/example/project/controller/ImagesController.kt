@@ -24,7 +24,7 @@ class ImagesController {
         return responseObjectMap.respondObject(r.content, r.totalElements)
     }
 
-    @GetMapping("/getById")
+    @GetMapping("/id")
     fun getAllByRoomTypeId(@RequestParam id: Long): MutableMap<String, Any> {
         val r = imagesService.getAllByRoomTypeId(id)
         return responseObjectMap.respondObject(r)

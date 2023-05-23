@@ -24,16 +24,16 @@ class RoomController {
         return responseObjectMap.respondObject(r.content, r.totalElements)
     }
 
-    @GetMapping("/getById")
+    @GetMapping("/id")
     fun getById(@RequestParam id: Long): MutableMap<String, Any> {
         val r = roomService.getRoomById(id)
         return responseObjectMap.respondObject(r)
     }
 
-    @GetMapping("/getCustom")
-    fun getAllCustomRoom(): MutableMap<String, Any> {
-        val r = roomService.getCustomRoom()
-        return responseObjectMap.respondObject(r)
+    @GetMapping("/get-custom")
+    fun getAllCustomRoom(@RequestParam page: Int, size: Int): MutableMap<String, Any> {
+        val r = roomService.getCustomRoom(page, size)
+        return responseObjectMap.respondObject(r.content, r.totalElements)
     }
 
     @PostMapping

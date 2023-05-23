@@ -30,23 +30,25 @@ class ImagesServiceImpl : BaseServiceImpl<Images>(), ImagesService {
 
     override fun addNew(imagesCustom: ImagesCustom): Images {
         val images = Images()
-        val r = roomTypeRepository.findAllById(imagesCustom.roomTypeId)
+        val r = roomTypeRepository.findByIdAndStatusTrue(imagesCustom.roomTypeId!!)
+            .orElseThrow { ResourceNotFoundException("Room type id: ${imagesCustom.roomTypeId} not found") }
         images.url = imagesCustom.url
         images.roomTypeId = r
         return imagesRepository.save(images)
     }
 
     override fun update(id: Long, imagesCustom: ImagesCustom): Images {
-        val r = imagesRepository.findById(id).orElse(null)
-            ?: throw ResourceNotFoundException("Image id: $id not founded")
+        val r = imagesRepository.findByIdAndStatusTrue(id)
+            .orElseThrow { ResourceNotFoundException("image $id is not found") }
         r.url = imagesCustom.url
-        r.roomTypeId = roomTypeRepository.findAllById(imagesCustom.roomTypeId)
+        r.roomTypeId = roomTypeRepository.findByIdAndStatusTrue(imagesCustom.roomTypeId!!)
+            .orElseThrow { ResourceNotFoundException("Room type id: ${imagesCustom.roomTypeId} not found") }
         return imagesRepository.save(r)
     }
 
     override fun delete(id: Long): Images {
-        val r = imagesRepository.findById(id).orElse(null)
-            ?: throw ResourceNotFoundException("Image id: $id not founded")
+        val r = imagesRepository.findByIdAndStatusTrue(id)
+            .orElseThrow { ResourceNotFoundException("image $id is not found") }
         r.status = false
         return imagesRepository.save(r)
     }

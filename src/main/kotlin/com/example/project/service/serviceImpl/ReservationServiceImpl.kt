@@ -1,6 +1,7 @@
 package com.example.project.service.serviceImpl
 
 import com.example.project.exception.ResourceNotAvailable
+import com.example.project.exception.ResourceNotFoundException
 import com.example.project.model.Reservation
 import com.example.project.model.Room
 import com.example.project.model.RoomType
@@ -48,13 +49,13 @@ class ReservationServiceImpl : BaseServiceImpl<Reservation>(), ReservationServic
     ): Page<Room> {
         val reserved = reservationRepository.findReservationsBetweenDates(checkInOn, checkOutOn)
         if (reserved.isEmpty()) {
-            val room = roomRepository.findAll()
+            val room = roomRepository.findAllByStatusTrue()
             room.forEach {
                 it.available = true
             }
             roomRepository.saveAll(room)
         } else {
-            val room = roomRepository.findAll()
+            val room = roomRepository.findAllByStatusTrue()
             val roomTmp: MutableList<Room> = mutableListOf()
             reserved.forEach { detail ->
                 detail.roomId!!.forEach {
@@ -123,7 +124,8 @@ class ReservationServiceImpl : BaseServiceImpl<Reservation>(), ReservationServic
     @Transactional
     override fun addNew(reservationCustom: ReservationCustom): Reservation {
         val reservation = Reservation()
-        val roomTmp = roomRepository.findAllById(reservationCustom.roomId)
+        val roomTmp = roomRepository.findByIdAndStatusTrue(reservationCustom.roomId!!)
+            .orElseThrow { ResourceNotFoundException("room id: ${reservationCustom.roomId} not found") }
         val roomChecked = getAllByDate(reservationCustom.checkInOn!!, reservationCustom.checkOutOn!!)
         roomChecked.forEach { detail ->
             detail.roomId!!.forEach {

@@ -1,6 +1,5 @@
 package com.example.project.security
 
-import com.example.project.model.Account
 import com.example.project.model.Privilege
 import com.example.project.model.Role
 import com.example.project.repository.AccountRepository
@@ -9,8 +8,7 @@ import org.springframework.security.core.userdetails.User
 import org.springframework.security.core.userdetails.UserDetails
 import org.springframework.security.core.userdetails.UserDetailsService
 import org.springframework.security.core.userdetails.UsernameNotFoundException
-import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder
-import org.springframework.security.core.authority.SimpleGrantedAuthority;
+import org.springframework.security.core.authority.SimpleGrantedAuthority
 import org.springframework.stereotype.Service
 import javax.transaction.Transactional
 import java.util.stream.Collectors.toList
@@ -19,19 +17,9 @@ import java.util.stream.Collectors.toList
 @Transactional
 class CustomUserDetailsService(private val accountRepository: AccountRepository) : UserDetailsService {
 
-    private val passwordEncoder = BCryptPasswordEncoder()
-
     override fun loadUserByUsername(username: String): UserDetails {
-        val list: List<Account> = accountRepository.findAll()
-        var foundUsername = username
-        for (userAccount in list) {
-            if (passwordEncoder.matches(username, userAccount.username)) {
-                foundUsername = userAccount.username.toString()
-            }
-        }
-        val accountbyusername = accountRepository.findByUsername(foundUsername)
+        val account = accountRepository.findByUsernameAndStatusTrue(username)
             .orElseThrow { UsernameNotFoundException("User $username not found.") }
-        val account = accountbyusername
         if (account.roles == null || account.roles!!.isEmpty()) {
             throw UsernameNotFoundException("User not Authorize.")
         }

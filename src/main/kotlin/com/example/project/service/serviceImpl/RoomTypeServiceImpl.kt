@@ -26,8 +26,8 @@ class RoomTypeServiceImpl : BaseServiceImpl<RoomType>(), RoomTypeService {
     }
 
     override fun update(id: Long, roomTypeCustom: RoomTypeCustom): RoomType {
-        val r = roomTypeRepository.findById(id).orElse(null)
-            ?: throw ResourceNotFoundException("Room Type id: $id not founded")
+        val r = roomTypeRepository.findByIdAndStatusTrue(id)
+            .orElseThrow { ResourceNotFoundException("Room Type id: $id not founded") }
         r.name = roomTypeCustom.name
         r.bedType = roomTypeCustom.bedType
         r.price = roomTypeCustom.price
@@ -42,14 +42,17 @@ class RoomTypeServiceImpl : BaseServiceImpl<RoomType>(), RoomTypeService {
     }
 
     override fun delete(id: Long): RoomType {
-        val r = roomTypeRepository.findById(id).orElse(null)
-            ?: throw ResourceNotFoundException("Room Type id: $id not founded")
+        val r = roomTypeRepository.findByIdAndStatusTrue(id).orElseThrow {
+            ResourceNotFoundException("Room type id: $id not found")
+        }
         r.status = false
         return roomTypeRepository.save(r)
     }
 
     override fun getById(id: Long): RoomType {
-        return roomTypeRepository.findAllById(id)
+        return roomTypeRepository.findByIdAndStatusTrue(id).orElseThrow {
+            ResourceNotFoundException("Room type id: $id not found")
+        }
     }
 
     @Transactional

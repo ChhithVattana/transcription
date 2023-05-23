@@ -1,7 +1,7 @@
 package com.example.project.service.serviceImpl
 
+import com.example.project.exception.ResourceNotFoundException
 import com.example.project.model.Account
-import com.example.project.model.Role
 import com.example.project.model.customModel.AccountCustom
 import com.example.project.repository.AccountRepository
 import com.example.project.repository.RoleRepository
@@ -13,10 +13,11 @@ import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder
 import org.springframework.stereotype.Service
 
 @Service
-class AccountServiceImpl : BaseServiceImpl<Account>(), AccountService{
+class AccountServiceImpl : BaseServiceImpl<Account>(), AccountService {
 
     @Autowired
     lateinit var accountRepository: AccountRepository
+
     @Autowired
     lateinit var roleRepository: RoleRepository
 
@@ -40,7 +41,8 @@ class AccountServiceImpl : BaseServiceImpl<Account>(), AccountService{
     }
 
     override fun delete(id: Long): Account {
-        val r = accountRepository.findById(id).get()
+        val r = accountRepository.findByIdAndStatusTrue(id)
+            .orElseThrow { ResourceNotFoundException("account $id is not found") }
         r.isEnabled = false
         r.status = false
         return accountRepository.save(r)
@@ -48,7 +50,8 @@ class AccountServiceImpl : BaseServiceImpl<Account>(), AccountService{
 
     override fun update(id: Long, accountCustom: AccountCustom): Account {
         val passwordEncoder = BCryptPasswordEncoder()
-        val r = accountRepository.findById(id).get()
+        val r = accountRepository.findByIdAndStatusTrue(id)
+            .orElseThrow { ResourceNotFoundException("account $id is not found") }
         r.password = passwordEncoder.encode(accountCustom.password)
         return accountRepository.save(r)
     }

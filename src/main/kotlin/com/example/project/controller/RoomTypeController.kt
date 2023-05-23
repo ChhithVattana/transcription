@@ -9,7 +9,7 @@ import org.springframework.security.access.prepost.PreAuthorize
 import org.springframework.web.bind.annotation.*
 
 @RestController
-@RequestMapping(AppConstant.MAIN_ENDPOINT + "/roomType")
+@RequestMapping(AppConstant.MAIN_ENDPOINT + "/room-type")
 class RoomTypeController {
 
     @Autowired
@@ -24,7 +24,7 @@ class RoomTypeController {
         return responseObjectMap.respondObject(r.content, r.totalElements)
     }
 
-    @GetMapping("/getById")
+    @GetMapping("/id")
     fun getByID(@RequestParam id: Long): MutableMap<String, Any> {
         val r = roomTypeService.getById(id)
         return responseObjectMap.respondObject(r)

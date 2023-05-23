@@ -1,5 +1,6 @@
 package com.example.project.service.serviceImpl
 
+import com.example.project.exception.ResourceNotFoundException
 import com.example.project.model.Employee
 import com.example.project.repository.EmployeeRepository
 import com.example.project.service.EmployeeService
@@ -11,7 +12,7 @@ import org.springframework.data.jpa.repository.JpaSpecificationExecutor
 import org.springframework.stereotype.Service
 
 @Service
-class EmployeeServiceImpl : BaseServiceImpl<Employee>(), EmployeeService{
+class EmployeeServiceImpl : BaseServiceImpl<Employee>(), EmployeeService {
 
     @Autowired
     lateinit var employeeRepository: EmployeeRepository
@@ -41,7 +42,8 @@ class EmployeeServiceImpl : BaseServiceImpl<Employee>(), EmployeeService{
     }
 
     override fun update(id: Long, employee: Employee): Employee {
-        val r = employeeRepository.findById(id).get()
+        val r = employeeRepository.findByIdAndStatusTrue(id)
+            .orElseThrow { ResourceNotFoundException("employee $id is not found") }
         r.name = employee.name
         r.gender = employee.gender
         r.email = employee.email
@@ -54,7 +56,8 @@ class EmployeeServiceImpl : BaseServiceImpl<Employee>(), EmployeeService{
     }
 
     override fun delete(id: Long): Employee {
-        val r = employeeRepository.findById(id).get()
+        val r = employeeRepository.findByIdAndStatusTrue(id)
+            .orElseThrow { ResourceNotFoundException("employee $id is not found") }
         r.status = false
         return employeeRepository.save(r)
     }

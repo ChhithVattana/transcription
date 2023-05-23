@@ -8,5 +8,6 @@ import java.util.*
 
 @Repository
 interface AccountRepository : JpaRepository<Account, Long>, JpaSpecificationExecutor<Account> {
-    fun findByUsername(username: String): Optional<Account>
+    fun findByUsernameAndStatusTrue(username: String): Optional<Account>
+    fun findByIdAndStatusTrue(id: Long): Optional<Account>
 }

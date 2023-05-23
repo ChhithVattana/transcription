@@ -27,7 +27,7 @@ class ReservationController {
 
     // convert the dat format by using @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) to avoid error
     // Failed to convert value of type 'java.lang.String' to required type 'java.time.LocalDate';
-    @GetMapping("/getByDate")
+    @GetMapping("/get-by-date")
     fun getByDate(
         @RequestParam("checkIn") @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) checkIn: LocalDate,
         @RequestParam("checkOut") @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) checkOut: LocalDate,
@@ -36,7 +36,7 @@ class ReservationController {
         return responseObjectMap.respondObject(r)
     }
 
-    @GetMapping("/searchAvailable")
+    @GetMapping("/search-available")
     fun getSpecific(
         @RequestParam(required = false) page: Int,
         size: Int,
@@ -56,7 +56,7 @@ class ReservationController {
         return responseObjectMap.respondObject(r)
     }
 
-    @PostMapping("/addBooking/searchAvailable")
+    @PostMapping("/add-booking/search-available")
     fun addBooking(
         @RequestParam(required = false)
         page: Int,

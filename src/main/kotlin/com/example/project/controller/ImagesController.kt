@@ -15,39 +15,30 @@ class ImagesController {
     @Autowired
     lateinit var imagesService: ImagesService
 
-    @Autowired
-    lateinit var responseObjectMap: ResponseObjectMap
+    val response = ResponseObjectMap()
 
     @GetMapping
     fun getAllImage(@RequestParam(required = false) page: Int, size: Int, q: String): MutableMap<String, Any> {
         val r = imagesService.getByPage(page, size, q)
-        return responseObjectMap.respondObject(r.content, r.totalElements)
+        return response.respondObject(r.content, r.totalElements)
     }
 
     @GetMapping("/id")
-    fun getAllByRoomTypeId(@RequestParam id: Long): MutableMap<String, Any> {
-        val r = imagesService.getAllByRoomTypeId(id)
-        return responseObjectMap.respondObject(r)
-    }
+    fun getAllByRoomTypeId(@RequestParam id: Long): MutableMap<String, Any> =
+        response.respondObject(imagesService.getAllByRoomTypeId(id))
 
     @PostMapping
     @PreAuthorize("hasAuthority('PRIVILEGE_ADMIN_INSERT')")
-    fun addNew(@RequestBody imagesCustom: ImagesCustom): MutableMap<String, Any> {
-        val r = imagesService.addNew(imagesCustom)
-        return responseObjectMap.respondObject(r)
-    }
+    fun addNew(@RequestBody imagesCustom: ImagesCustom): MutableMap<String, Any> =
+        response.respondObject(imagesService.addNew(imagesCustom))
 
     @PutMapping("/{id}/update")
     @PreAuthorize("hasAuthority('PRIVILEGE_ADMIN_UPDATE')")
-    fun update(@PathVariable id: Long, @RequestBody imagesCustom: ImagesCustom): MutableMap<String, Any> {
-        val r = imagesService.update(id, imagesCustom)
-        return responseObjectMap.respondObject(r)
-    }
+    fun update(@PathVariable id: Long, @RequestBody imagesCustom: ImagesCustom): MutableMap<String, Any> =
+        response.respondObject(imagesService.update(id, imagesCustom))
 
     @DeleteMapping
     @PreAuthorize("hasAuthority('PRIVILEGE_ADMIN_DELETE')")
-    fun delete(@RequestParam id: Long): MutableMap<String, Any> {
-        val r = imagesService.delete(id)
-        return responseObjectMap.respondObject(r)
-    }
+    fun delete(@RequestParam id: Long): MutableMap<String, Any> =
+        response.respondObject(imagesService.delete(id))
 }

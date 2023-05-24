@@ -17,8 +17,7 @@ class TransactionController {
     @Autowired
     lateinit var transactionService: TransactionService
 
-    @Autowired
-    lateinit var responseObjectMap: ResponseObjectMap
+    val response = ResponseObjectMap()
 
     @GetMapping
     fun getByDate(
@@ -29,6 +28,6 @@ class TransactionController {
         q: String?,
     ): MutableMap<String, Any> {
         val r = transactionService.getByDate(page, size, date, q)
-        return responseObjectMap.respondObject(r.content, r.totalElements)
+        return response.respondObject(r.content, r.totalElements)
     }
 }

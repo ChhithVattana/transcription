@@ -15,45 +15,36 @@ class RoomController {
     @Autowired
     lateinit var roomService: RoomService
 
-    @Autowired
-    lateinit var responseObjectMap: ResponseObjectMap
+    val response = ResponseObjectMap()
 
     @GetMapping
     fun getAllRoom(@RequestParam(required = false) page: Int, size: Int, q: String): MutableMap<String, Any> {
         val r = roomService.getByPage(page, size, q)
-        return responseObjectMap.respondObject(r.content, r.totalElements)
+        return response.respondObject(r.content, r.totalElements)
     }
 
     @GetMapping("/id")
-    fun getById(@RequestParam id: Long): MutableMap<String, Any> {
-        val r = roomService.getRoomById(id)
-        return responseObjectMap.respondObject(r)
-    }
+    fun getById(@RequestParam id: Long): MutableMap<String, Any> =
+        response.respondObject(roomService.getRoomById(id))
 
     @GetMapping("/get-custom")
     fun getAllCustomRoom(@RequestParam page: Int, size: Int): MutableMap<String, Any> {
         val r = roomService.getCustomRoom(page, size)
-        return responseObjectMap.respondObject(r.content, r.totalElements)
+        return response.respondObject(r.content, r.totalElements)
     }
 
     @PostMapping
     @PreAuthorize("hasAuthority('PRIVILEGE_ADMIN_INSERT')")
-    fun addNewRoom(@RequestBody roomCustom: RoomCustom): MutableMap<String, Any> {
-        val r = roomService.addNew(roomCustom)
-        return responseObjectMap.respondObject(r)
-    }
+    fun addNewRoom(@RequestBody roomCustom: RoomCustom): MutableMap<String, Any> =
+        response.respondObject(roomService.addNew(roomCustom))
 
     @PutMapping("/{id}/update")
     @PreAuthorize("hasAuthority('PRIVILEGE_ADMIN_UPDATE')")
-    fun updateRoom(@PathVariable id: Long, @RequestBody roomCustom: RoomCustom): MutableMap<String, Any> {
-        val r = roomService.update(id, roomCustom)
-        return responseObjectMap.respondObject(r)
-    }
+    fun updateRoom(@PathVariable id: Long, @RequestBody roomCustom: RoomCustom): MutableMap<String, Any> =
+        response.respondObject(roomService.update(id, roomCustom))
 
     @DeleteMapping
     @PreAuthorize("hasAuthority('PRIVILEGE_ADMIN_DELETE')")
-    fun deleteRoom(@RequestParam id: Long): MutableMap<String, Any> {
-        val r = roomService.delete(id)
-        return responseObjectMap.respondObject(r)
-    }
+    fun deleteRoom(@RequestParam id: Long): MutableMap<String, Any> =
+        response.respondObject(roomService.delete(id))
 }

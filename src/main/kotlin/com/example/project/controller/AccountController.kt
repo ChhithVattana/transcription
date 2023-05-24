@@ -1,6 +1,5 @@
 package com.example.project.controller
 
-import com.example.project.model.Account
 import com.example.project.model.customModel.AccountCustom
 import com.example.project.service.AccountService
 import com.example.project.utils.AppConstant
@@ -15,34 +14,28 @@ class AccountController {
 
     @Autowired
     lateinit var accountService: AccountService
-    @Autowired
-    lateinit var responseObjectMap: ResponseObjectMap
+
+    val response = ResponseObjectMap()
 
     @GetMapping
     @PreAuthorize("hasAuthority('PRIVILEGE_ADMIN_GETALL')")
     fun getAll(@RequestParam(required = false) page: Int, size: Int, q: String?): MutableMap<String, Any> {
         val r = accountService.getByPage(page, size, q)
-        return responseObjectMap.respondObject(r.content, r.totalElements)
+        return response.respondObject(r.content, r.totalElements)
     }
 
     @PostMapping
     @PreAuthorize("hasAuthority('PRIVILEGE_ADMIN_INSERT')")
-    fun addNew(@RequestBody accountCustom: AccountCustom): MutableMap<String, Any> {
-        val r = accountService.createAcc(accountCustom)
-        return responseObjectMap.respondObject(r)
-    }
+    fun addNew(@RequestBody accountCustom: AccountCustom): MutableMap<String, Any> =
+        response.respondObject(accountService.createAcc(accountCustom))
 
     @PutMapping("/{id}/update")
     @PreAuthorize("hasAuthority('PRIVILEGE_ADMIN_UPDATE')")
-    fun update(@PathVariable id: Long, @RequestBody accountCustom: AccountCustom): MutableMap<String, Any> {
-        val r = accountService.update(id, accountCustom)
-        return responseObjectMap.respondObject(r)
-    }
+    fun update(@PathVariable id: Long, @RequestBody accountCustom: AccountCustom): MutableMap<String, Any> =
+        response.respondObject(accountService.update(id, accountCustom))
 
     @DeleteMapping("/delete")
     @PreAuthorize("hasAuthority('PRIVILEGE_ADMIN_DELETE')")
-    fun delete(@RequestParam id: Long): MutableMap<String, Any> {
-        val r = accountService.delete(id)
-        return responseObjectMap.respondObject(r)
-    }
+    fun delete(@RequestParam id: Long): MutableMap<String, Any> =
+        response.respondObject(accountService.delete(id))
 }

@@ -16,13 +16,12 @@ class ReservationController {
     @Autowired
     lateinit var reservationService: ReservationService
 
-    @Autowired
-    lateinit var responseObjectMap: ResponseObjectMap
+    val response = ResponseObjectMap()
 
     @GetMapping
     fun getAllReservation(@RequestParam(required = false) page: Int, size: Int, q: String): MutableMap<String, Any> {
         val r = reservationService.getByPage(page, size, q)
-        return responseObjectMap.respondObject(r.content, r.totalElements)
+        return response.respondObject(r.content, r.totalElements)
     }
 
     // convert the dat format by using @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) to avoid error
@@ -31,10 +30,8 @@ class ReservationController {
     fun getByDate(
         @RequestParam("checkIn") @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) checkIn: LocalDate,
         @RequestParam("checkOut") @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) checkOut: LocalDate,
-    ): MutableMap<String, Any> {
-        val r = reservationService.getAllByDate(checkIn, checkOut)
-        return responseObjectMap.respondObject(r)
-    }
+    ): MutableMap<String, Any> =
+        response.respondObject(reservationService.getAllByDate(checkIn, checkOut))
 
     @GetMapping("/search-available")
     fun getSpecific(
@@ -47,14 +44,12 @@ class ReservationController {
         isAvailable: Boolean?,
     ): MutableMap<String, Any> {
         val r = reservationService.searchAvailable(page, size, checkInOn, checkOutOn, capacity, q, isAvailable)
-        return responseObjectMap.respondObject(r.content, r.totalElements)
+        return response.respondObject(r.content, r.totalElements)
     }
 
     @PostMapping
-    fun addNew(@RequestBody reservationCustom: ReservationCustom): MutableMap<String, Any> {
-        val r = reservationService.addNew(reservationCustom)
-        return responseObjectMap.respondObject(r)
-    }
+    fun addNew(@RequestBody reservationCustom: ReservationCustom): MutableMap<String, Any> =
+        response.respondObject(reservationService.addNew(reservationCustom))
 
     @PostMapping("/add-booking/search-available")
     fun addBooking(
@@ -71,16 +66,18 @@ class ReservationController {
         isAvailable: Boolean?,
         @RequestBody
         reservationCustom: ReservationCustom,
-    ): MutableMap<String, Any> {
-        val r = reservationService.addBooking(page,
-            size,
-            checkInOn,
-            checkOutOn,
-            capacity,
-            q,
-            isAvailable,
-            reservationCustom,
-            noOfRoom)
-        return responseObjectMap.respondObject(r)
-    }
+    ): MutableMap<String, Any> =
+        response.respondObject(
+            reservationService.addBooking(
+                page,
+                size,
+                checkInOn,
+                checkOutOn,
+                capacity,
+                q,
+                isAvailable,
+                reservationCustom,
+                noOfRoom
+            )
+        )
 }

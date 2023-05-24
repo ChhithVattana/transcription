@@ -16,13 +16,13 @@ class RoleController {
 
     @Autowired
     lateinit var roleService: RoleService
-    @Autowired
-    lateinit var responseObjectMap: ResponseObjectMap
+
+    val response = ResponseObjectMap()
 
     @GetMapping
     @PreAuthorize("hasAuthority('PRIVILEGE_ADMIN_GETALL')")
     fun getAll(@RequestParam(required = false) page: Int, size: Int, q: String?): MutableMap<String, Any> {
         val r = roleService.getByPage(page, size, q)
-        return responseObjectMap.respondObject(r.content, r.totalElements)
+        return response.respondObject(r.content, r.totalElements)
     }
 }

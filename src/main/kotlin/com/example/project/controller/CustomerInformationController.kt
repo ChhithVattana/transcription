@@ -15,12 +15,12 @@ class CustomerInformationController {
 
     @Autowired
     lateinit var customerInformationService: CustomerInformationService
-    @Autowired
-    lateinit var responseObjectMap: ResponseObjectMap
+
+    val response = ResponseObjectMap()
 
     @GetMapping
     fun getAll(@RequestParam(required = false) page: Int, size: Int, q: String?): MutableMap<String, Any> {
         val r = customerInformationService.getAll(page, size, q)
-        return responseObjectMap.respondObject(r.content, r.totalElements)
+        return response.respondObject(r.content, r.totalElements)
     }
 }

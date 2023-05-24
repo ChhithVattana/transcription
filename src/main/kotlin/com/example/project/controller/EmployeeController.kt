@@ -13,30 +13,24 @@ class EmployeeController {
 
     @Autowired
     lateinit var employeeService: EmployeeService
-    @Autowired
-    lateinit var responseObjectMap: ResponseObjectMap
+
+    val response = ResponseObjectMap()
 
     @GetMapping
     fun getAll(page: Int, size: Int, q: String?): MutableMap<String, Any> {
         val r = employeeService.getAll(page, size, q)
-        return responseObjectMap.respondObject(r.content, r.totalElements)
+        return response.respondObject(r.content, r.totalElements)
     }
 
     @PostMapping
-    fun addNew(@RequestBody employee: Employee): MutableMap<String, Any> {
-        val r = employeeService.addNew(employee)
-        return responseObjectMap.respondObject(r)
-    }
+    fun addNew(@RequestBody employee: Employee): MutableMap<String, Any> =
+        response.respondObject(employeeService.addNew(employee))
 
     @PutMapping("/{id}/update")
-    fun update(@PathVariable id: Long, @RequestBody employee: Employee): MutableMap<String, Any> {
-        val r = employeeService.update(id, employee)
-        return responseObjectMap.respondObject(r)
-    }
+    fun update(@PathVariable id: Long, @RequestBody employee: Employee): MutableMap<String, Any> =
+        response.respondObject(employeeService.update(id, employee))
 
     @DeleteMapping("/delete")
-    fun delete(@RequestParam id: Long): MutableMap<String, Any> {
-        val r = employeeService.delete(id)
-        return responseObjectMap.respondObject(r)
-    }
+    fun delete(@RequestParam id: Long): MutableMap<String, Any> =
+        response.respondObject(employeeService.delete(id))
 }

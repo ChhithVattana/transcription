@@ -4,7 +4,7 @@ import org.springframework.context.annotation.Configuration
 import org.springframework.security.authentication.AuthenticationManager
 import org.springframework.security.config.annotation.web.builders.HttpSecurity
 import org.springframework.security.core.userdetails.UserDetailsService
-import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder
+import org.springframework.security.crypto.password.PasswordEncoder
 import org.springframework.security.oauth2.config.annotation.configurers.ClientDetailsServiceConfigurer
 import org.springframework.security.oauth2.config.annotation.web.configuration.AuthorizationServerConfigurerAdapter
 import org.springframework.security.oauth2.config.annotation.web.configuration.EnableAuthorizationServer
@@ -36,7 +36,7 @@ class OAuth2ServerConfiguration {
     @EnableAuthorizationServer
     protected class AuthorizationServerConfiguration(
         private val jwtAccessTokenConverter: JwtAccessTokenConverter,
-        private val passwordEncoder: BCryptPasswordEncoder,
+        private val passwordEncoder: PasswordEncoder,
         private val authenticationManager: AuthenticationManager,
         private val userDetailsService: UserDetailsService,
     ) : AuthorizationServerConfigurerAdapter() {

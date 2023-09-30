@@ -8,7 +8,14 @@ import java.time.LocalDate
 
 interface ReservationService : BaseService<Reservation> {
     fun getAllByDate(checkIn: LocalDate, checkOut: LocalDate): List<Reservation>
-    fun searchAvailable(
+    fun getByList(
+        page: Int,
+        size: Int,
+        checkIn: LocalDate,
+        checkOut: LocalDate
+    ): Page<Reservation>
+
+    fun searchAvailableList(
         page: Int,
         size: Int,
         checkInOn: LocalDate?,
@@ -17,6 +24,14 @@ interface ReservationService : BaseService<Reservation> {
         q: String?,
         isAvailable: Boolean?,
     ): Page<Room>
+
+    fun searchAvailableAll(
+        checkInOn: LocalDate?,
+        checkOutOn: LocalDate?,
+        capacity: Int?,
+        q: String?,
+        isAvailable: Boolean?,
+    ): List<Room>
 
     fun addNew(reservationCustom: ReservationCustom): Reservation
     fun addBooking(

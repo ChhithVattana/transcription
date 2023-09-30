@@ -1,5 +1,6 @@
 package com.example.project.config
 
+import com.example.project.utils.AppConstant
 import org.springframework.context.annotation.Configuration
 import org.springframework.security.authentication.AuthenticationManager
 import org.springframework.security.config.annotation.web.builders.HttpSecurity
@@ -28,7 +29,15 @@ class OAuth2ServerConfiguration {
 
         @Throws(Exception::class)
         override fun configure(http: HttpSecurity) {
-            http.csrf().disable().authorizeRequests().anyRequest().authenticated()
+            http
+                .csrf()
+                .disable()
+                .authorizeRequests()
+                .antMatchers("/api/v1/room/**").permitAll()
+                .antMatchers("/api/v1/room-type/**").permitAll()
+                .antMatchers("/api/v1/images/**").permitAll()
+                .anyRequest()
+                .authenticated()
         }
     }
 
@@ -43,7 +52,9 @@ class OAuth2ServerConfiguration {
 
         @Throws(Exception::class)
         override fun configure(endpoints: AuthorizationServerEndpointsConfigurer) {
-            endpoints.tokenStore(JwtTokenStore(jwtAccessTokenConverter))
+            endpoints
+                .pathMapping("/oauth/token", "/api/v1/login") // Update the endpoint mapping
+                .tokenStore(JwtTokenStore(jwtAccessTokenConverter))
                 .authenticationManager(authenticationManager)
                 .accessTokenConverter(jwtAccessTokenConverter)
                 .userDetailsService(userDetailsService)
@@ -56,7 +67,7 @@ class OAuth2ServerConfiguration {
                 .secret(passwordEncoder.encode("Seyy"))
                 .authorizedGrantTypes("password", "refresh_token")
                 .scopes("read", "write", "delete", "update")
-                .accessTokenValiditySeconds(36000)
+                .accessTokenValiditySeconds(3600000)
         }
     }
 }

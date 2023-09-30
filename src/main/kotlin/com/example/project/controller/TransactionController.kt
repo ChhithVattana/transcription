@@ -30,4 +30,16 @@ class TransactionController {
         val r = transactionService.getByDate(page, size, date, q)
         return response.respondObject(r.content, r.totalElements)
     }
+
+    @GetMapping("/reservation-detail")
+    fun getDetail(
+        @RequestParam(required = false)
+        page: Int,
+        size: Int,
+        @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) date: LocalDate?,
+        q: String?,
+    ): MutableMap<String, Any> {
+        val r = transactionService.getCustomDetail(page, size, date, q)
+        return response.respondObject(r.content, r.totalElements)
+    }
 }

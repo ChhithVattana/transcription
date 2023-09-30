@@ -2,10 +2,13 @@ package com.example.project.service.serviceImpl
 
 import com.example.project.model.CustomerInformation
 import com.example.project.model.Transaction
+import com.example.project.model.customModel.TransactionCustom
 import com.example.project.repository.TransactionRepository
 import com.example.project.service.TransactionService
+import com.example.project.utils.Pagination
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.data.domain.Page
+import org.springframework.data.domain.PageImpl
 import org.springframework.data.domain.PageRequest
 import org.springframework.data.jpa.repository.JpaRepository
 import org.springframework.data.jpa.repository.JpaSpecificationExecutor
@@ -50,5 +53,27 @@ class TransactionServiceImpl : BaseServiceImpl<Transaction>(), TransactionServic
             query.orderBy(cb.desc(root.get<Long>("id")))
             cb.and(*predicates.toTypedArray())
         }, PageRequest.of(page, size))
+    }
+
+    override fun getCustomDetail(page: Int, size: Int, date: LocalDate?, q: String?): Page<TransactionCustom> {
+        val r = transactionRepository.findAll()
+        val detail = mutableListOf<TransactionCustom>()
+        val pagination = Pagination<TransactionCustom>()
+        r.forEach { tran ->
+            tran.reservation!!.forEach { reserved ->
+                reserved.roomId!!.forEach { roomDetail ->
+                    val tmp = TransactionCustom()
+                    tmp.id = roomDetail.id
+                    tmp.fName = tran.customerId!!.name
+                    tmp.phone = tran.customerId!!.phone
+                    tmp.checkInOn = reserved.checkInOn
+                    tmp.checkOutOn = reserved.checkOutOn
+                    tmp.stayDuration = reserved.stayDuration
+                    tmp.roomNo = roomDetail.roomNo
+                    detail.add(tmp)
+                }
+            }
+        }
+        return PageImpl(pagination.paginate(page, size, detail), PageRequest.of(page, size), detail.size.toLong())
     }
 }

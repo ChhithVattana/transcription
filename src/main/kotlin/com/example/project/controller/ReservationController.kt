@@ -33,7 +33,17 @@ class ReservationController {
     ): MutableMap<String, Any> =
         response.respondObject(reservationService.getAllByDate(checkIn, checkOut))
 
-    @GetMapping("/search-available")
+    @GetMapping("/get-by-list")
+    fun getByList(
+        @RequestParam(required = false) page: Int, size: Int,
+        @RequestParam("checkIn") @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) checkIn: LocalDate,
+        @RequestParam("checkOut") @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) checkOut: LocalDate,
+    ): MutableMap<String, Any> {
+        val r = reservationService.getByList(page, size, checkIn, checkOut)
+        return response.respondObject(r.content, r.totalElements)
+    }
+
+    @GetMapping("/search-available-list")
     fun getSpecific(
         @RequestParam(required = false) page: Int,
         size: Int,
@@ -43,8 +53,22 @@ class ReservationController {
         q: String?,
         isAvailable: Boolean?,
     ): MutableMap<String, Any> {
-        val r = reservationService.searchAvailable(page, size, checkInOn, checkOutOn, capacity, q, isAvailable)
+        val r = reservationService.searchAvailableList(page, size, checkInOn, checkOutOn, capacity, q, isAvailable)
         return response.respondObject(r.content, r.totalElements)
+    }
+
+    @GetMapping("/search-available-all")
+    fun getAllSpecific(
+        @RequestParam(required = false) page: Int,
+        size: Int,
+        @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) checkInOn: LocalDate?,
+        @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) checkOutOn: LocalDate?,
+        capacity: Int?,
+        q: String?,
+        isAvailable: Boolean?,
+    ): MutableMap<String, Any> {
+        val r = reservationService.searchAvailableAll(checkInOn, checkOutOn, capacity, q, isAvailable)
+        return response.respondObject(r)
     }
 
     @PostMapping

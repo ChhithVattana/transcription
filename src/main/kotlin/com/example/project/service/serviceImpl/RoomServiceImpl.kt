@@ -6,6 +6,7 @@ import com.example.project.model.customModel.RoomCustom
 import com.example.project.repository.RoomRepository
 import com.example.project.repository.RoomTypeRepository
 import com.example.project.service.RoomService
+import com.example.project.utils.Pagination
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.data.domain.Page
 import org.springframework.data.domain.PageImpl
@@ -32,10 +33,11 @@ class RoomServiceImpl : BaseServiceImpl<Room>(), RoomService {
     }
 
     override fun getCustomRoom(page: Int, size: Int): Page<RoomCustom> {
+        val pagination = Pagination<RoomCustom>()
         val room = roomRepository.findAllByStatusTrueOrderByIdDesc().map {
             RoomCustom(it.id, it.roomNo, it.available, it.roomTypeId!!.id)
         }
-        return PageImpl(room, PageRequest.of(page, size), room.size.toLong())
+        return PageImpl(pagination.paginate(page, size, room), PageRequest.of(page, size), room.size.toLong())
     }
 
     override fun getRoomById(id: Long): Room {

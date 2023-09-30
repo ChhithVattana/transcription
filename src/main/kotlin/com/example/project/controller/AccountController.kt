@@ -6,6 +6,9 @@ import com.example.project.utils.AppConstant
 import com.example.project.utils.ResponseObjectMap
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.security.access.prepost.PreAuthorize
+import org.springframework.security.core.Authentication
+import org.springframework.security.core.context.SecurityContextHolder
+import org.springframework.security.core.userdetails.UserDetails
 import org.springframework.web.bind.annotation.*
 
 @RestController
@@ -22,6 +25,18 @@ class AccountController {
     fun getAll(@RequestParam(required = false) page: Int, size: Int, q: String?): MutableMap<String, Any> {
         val r = accountService.getByPage(page, size, q)
         return response.respondObject(r.content, r.totalElements)
+    }
+
+    @GetMapping("/retrieve")
+    @PreAuthorize("hasAuthority('PRIVILEGE_ADMIN_GETALL')")
+    fun retrieveAcc(): String {
+        val authentication: Authentication = SecurityContextHolder.getContext().authentication
+        // Retrieve the user details from the authentication object
+        val userDetail = authentication.principal
+        // You can access other user details such as authorities, etc. if needed
+
+        // Use the user details as needed in your controller logic
+        return userDetail.toString()
     }
 
     @PostMapping

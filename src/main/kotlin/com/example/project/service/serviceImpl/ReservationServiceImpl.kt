@@ -9,6 +9,7 @@ import com.example.project.model.customModel.ReservationCustom
 import com.example.project.repository.ReservationRepository
 import com.example.project.repository.RoomRepository
 import com.example.project.service.ReservationService
+import com.example.project.utils.Pagination
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.data.domain.Page
 import org.springframework.data.domain.PageImpl
@@ -38,7 +39,7 @@ class ReservationServiceImpl : BaseServiceImpl<Reservation>(), ReservationServic
     }
 
     /* check condition from date first then go to filter out the available room */
-    override fun searchAvailable(
+    override fun searchAvailableList(
         page: Int,
         size: Int,
         checkInOn: LocalDate?,
@@ -108,8 +109,80 @@ class ReservationServiceImpl : BaseServiceImpl<Reservation>(), ReservationServic
             query.orderBy(cb.desc(root.get<Long>("id")))
             cb.and(*predicates.toTypedArray())
         }
+        val pagination = Pagination<Room>()
         // Use PageImpl(List<T> content, Pageable pageable, long total) to return Page<T>
-        return PageImpl(room, PageRequest.of(page, size), room.size.toLong())
+        return PageImpl(pagination.paginate(page, size, room), PageRequest.of(page, size), room.size.toLong())
+    }
+
+    override fun searchAvailableAll(
+        checkInOn: LocalDate?,
+        checkOutOn: LocalDate?,
+        capacity: Int?,
+        q: String?,
+        isAvailable: Boolean?
+    ): List<Room> {
+        val reserved = reservationRepository.findReservationsBetweenDates(checkInOn, checkOutOn)
+        if (reserved.isEmpty()) {
+            val room = roomRepository.findAllByStatusTrue()
+            room.forEach {
+                it.available = true
+            }
+            roomRepository.saveAll(room)
+        } else {
+            val room = roomRepository.findAllByStatusTrue()
+            val roomTmp: MutableList<Room> = mutableListOf()
+            reserved.forEach { detail ->
+                detail.roomId!!.forEach {
+                    it.available = detail.checkOutOn == checkInOn
+                    roomTmp.add(it)
+                }
+            }
+            roomTmp.forEach {
+                room.forEach { room ->
+                    if (it.id == room.id) {
+                        room.available = it.available
+                    }
+                }
+            }
+            roomRepository.saveAll(room)
+        }
+        val room = roomRepository.findAll { root, query, cb ->
+            val predicates = ArrayList<javax.persistence.criteria.Predicate>()
+            capacity?.let {
+                predicates.add(
+                    cb.greaterThanOrEqualTo(
+                        root.join<Room, RoomType>("roomTypeId")
+                            .get("capacity"), capacity
+                    )
+                )
+            }
+            q?.let {
+                val roomNoPredicate =
+                    cb.like(cb.upper(root.get("roomNo")), "%${q.uppercase()}%")
+                val roomNamePredicate =
+                    cb.like(
+                        cb.upper(
+                            root.join<Room, RoomType>("roomTypeId")
+                                .get("name")
+                        ), "%${q.uppercase()}%"
+                    )
+                val bedTypePredicate =
+                    cb.like(
+                        cb.upper(
+                            root.join<Room, RoomType>("roomTypeId")
+                                .get("bedType")
+                        ), "%${q.uppercase()}%"
+                    )
+                predicates.add(cb.or(roomNoPredicate, roomNamePredicate, bedTypePredicate))
+            }
+            isAvailable?.let {
+                predicates.add(cb.equal(root.get<Boolean>("available"), isAvailable))
+            }
+            predicates.add(cb.equal(root.get<Boolean>("status"), true))
+            query.orderBy(cb.desc(root.get<Long>("id")))
+            cb.and(*predicates.toTypedArray())
+        }
+        return room
     }
 
     override fun getAllByDate(checkIn: LocalDate, checkOut: LocalDate): List<Reservation> {
@@ -118,6 +191,19 @@ class ReservationServiceImpl : BaseServiceImpl<Reservation>(), ReservationServic
             reservationRepository.saveAll(this)
         }
         return reservations
+    }
+
+    override fun getByList(
+        page: Int,
+        size: Int,
+        checkIn: LocalDate,
+        checkOut: LocalDate
+    ): Page<Reservation> {
+        val reservations = reservationRepository.findReservationsBetweenDates(checkIn, checkOut).apply {
+            forEach { detail -> detail.roomId!!.forEach { room -> room.available = false } }
+            reservationRepository.saveAll(this)
+        }
+        return PageImpl(reservations, PageRequest.of(page, size), reservations.size.toLong())
     }
 
     // ChronoUnit.DAYS.between(V1, V2) to get day between V2-V1, Vn: LocalDate
@@ -159,7 +245,7 @@ class ReservationServiceImpl : BaseServiceImpl<Reservation>(), ReservationServic
         noOfRoom: Int,
     ): Reservation {
         val reservation = Reservation()
-        val r = searchAvailable(page, size, checkInOn, checkOutOn, capacity, q, isAvailable)
+        val r = searchAvailableList(page, size, checkInOn, checkOutOn, capacity, q, isAvailable)
         val roomTmp: MutableList<Room> = mutableListOf()
         var count = 0
         r.forEach {

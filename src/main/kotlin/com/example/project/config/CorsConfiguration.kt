@@ -28,7 +28,7 @@ class CorsConfiguration {
         val source = UrlBasedCorsConfigurationSource()
         val config = CorsConfiguration()
         config.allowCredentials = true
-        config.allowedOriginPatterns = listOf("http://localhost:4200", "https://m1g7.sey.iteg7.com")
+        config.allowedOriginPatterns = listOf("http://localhost:4200", "https://cloudnote.seynaa.com")
         config.allowedMethods = listOf("GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS", "UPDATE")
         config.allowedHeaders = listOf("authorization", "content-type", "x-auth-token")
         config.exposedHeaders = listOf("x-auth-token")
